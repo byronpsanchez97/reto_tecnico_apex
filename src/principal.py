@@ -9,7 +9,7 @@ from src.transformaciones import (
     estandarizar_columnas,
     convertir_fecha_proceso,
     aplicar_calidad_datos,
-    filtrar_por_fecha_y_pais,
+    filtrar_por_fechas_y_pais,
     normalizar_unidades_a_st,
     clasificar_entregas,
     agregar_columnas_adicionales,
