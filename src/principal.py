@@ -4,7 +4,7 @@ import argparse
 from omegaconf import OmegaConf
 from pyspark.sql import functions as F
 
-from src.funciones import crear_spark, validar_fecha_iso, log, construir_ruta
+from src.funciones import crear_sesion_spark, validar_fecha_iso, log, construir_ruta
 from src.transformaciones import (
     estandarizar_columnas,
     aplicar_calidad_datos,
@@ -91,20 +91,19 @@ def main():
     log(f"Entorno: {cfg.app.entorno}")
     log(f"Rango: {cfg.filtros.fecha_inicio} -> {cfg.filtros.fecha_fin}, país={cfg.filtros.pais}")
 
-    spark = crear_spark(cfg.app.nombre)
+    spark = crear_sesion_spark(cfg.app.nombre)
 
     # =====================
-    # RAW
+    # Leer Origen
     # =====================
-    log("Leyendo RAW...")
+    log("Leyendo Origen...")
     df = _leer_csv_bronze(spark, cfg)
 
     # =====================
-    # SILVER
+    # Persistencia intermedia
     # =====================
     log("Estandarizando columnas...")
     df = estandarizar_columnas(df)
-
 
     log("Aplicando calidad de datos...")
     df = aplicar_calidad_datos(df, cfg)
@@ -115,7 +114,7 @@ def main():
     log("Normalizando unidades (CS->ST)...")
     df = normalizar_unidades_a_st(df, cfg)
 
-    log("Escribiendo SILVER...")
+    log("Persistenciendo df con limpieza...")
     _escribir_silver(df, cfg)
 
     # =====================

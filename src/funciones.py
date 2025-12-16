@@ -49,7 +49,7 @@ def seguimiento(func):
     return wrapper
 
 
-def crear_spark(nombre_app: str):
+def crear_sesion_spark(nombre_app: str):
     spark = (
         SparkSession.builder
         .appName(nombre_app)

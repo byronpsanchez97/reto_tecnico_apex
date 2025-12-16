@@ -203,7 +203,7 @@ def agregar_columnas_adicionales(df: DataFrame, cfg) -> DataFrame:
 @seguimiento
 def seleccionar_columnas_finales(df: DataFrame) -> DataFrame:
     """
-    Estándar final de columnas (snake_case, minúsculas) y selección para output.
+    Estándar final de columnas
     """
     columnas = [
         "pais",
@@ -223,7 +223,6 @@ def seleccionar_columnas_finales(df: DataFrame) -> DataFrame:
         "valor_total",
         "valor_rutina",
         "valor_bonificacion",
-        "etl_entorno",
         "etl_timestamp",
     ]
     existentes = [c for c in columnas if c in df.columns]
