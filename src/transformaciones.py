@@ -1,5 +1,5 @@
 from pyspark.sql import functions as F
-from src.funciones import normalizar_texto, seguimiento
+from src.funciones import  seguimiento
 
 
 # =========================
