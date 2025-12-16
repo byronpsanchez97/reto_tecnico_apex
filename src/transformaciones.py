@@ -154,56 +154,70 @@ def normalizar_unidades_a_st(df: DataFrame, cfg) -> DataFrame:
 def clasificar_entregas(df: DataFrame, cfg) -> DataFrame:
     """
     Crea columnas:
-      - qty_rutina: ZPRE/ZVE1
-      - qty_bonificacion: Z04/Z05
-      - qty_total_st: suma
-    Descarta cualquier otro tipo_entrega (ya filtrado por DQ, pero reforzamos).
-    """
-    rutina = [x for x in cfg.reglas_negocio.entregas_rutina]
-    bonif = [x for x in cfg.reglas_negocio.entregas_bonificacion]
-    validos = list(set(rutina + bonif))
+      - cantidad_rutina: entregas tipo ZPRE / ZVE1
+      - cantidad_bonificacion: entregas tipo Z04 / Z05
+      - cantidad_total_estandar: suma de rutina y bonificación
 
-    df = df.filter(F.col("tipo_entrega").isin(validos))
+    Descarta otro tipo_entrega no válido.
+    """
+    entregas_rutina = list(cfg.reglas_negocio.entregas_rutina)
+    entregas_bonificacion = list(cfg.reglas_negocio.entregas_bonificacion)
+    entregas_validas = list(set(entregas_rutina + entregas_bonificacion))
+
+    df = df.filter(F.col("tipo_entrega").isin(entregas_validas))
 
     return (
-        df.withColumn(
-            "qty_rutina",
-            F.when(F.col("tipo_entrega").isin(rutina), F.col("cantidad_st")).otherwise(F.lit(0.0))
+        df
+        .withColumn(
+            "cantidad_rutina",
+            F.when(
+                F.col("tipo_entrega").isin(entregas_rutina),
+                F.col("cantidad_estandar")
+            ).otherwise(F.lit(0.0))
         )
         .withColumn(
-            "qty_bonificacion",
-            F.when(F.col("tipo_entrega").isin(bonif), F.col("cantidad_st")).otherwise(F.lit(0.0))
+            "cantidad_bonificacion",
+            F.when(
+                F.col("tipo_entrega").isin(entregas_bonificacion),
+                F.col("cantidad_estandar")
+            ).otherwise(F.lit(0.0))
         )
         .withColumn(
-            "qty_total_st",
-            F.col("qty_rutina") + F.col("qty_bonificacion")
+            "cantidad_total_estandar",
+            F.col("cantidad_rutina") + F.col("cantidad_bonificacion")
         )
     )
+
 
 @seguimiento
 def agregar_columnas_adicionales(df: DataFrame, cfg) -> DataFrame:
     """
-    Extras con fundamento:
-    - valor_total (cantidad_st * precio)
-    - valor_rutina / valor_bonificacion (para análisis)
-    - auditoría
+    Agrega métricas monetarias y columnas de auditoría.
     """
-    df = df.withColumn("valor_total", F.col("cantidad_st") * F.col("precio"))
-
-    df = (
-        df.withColumn("valor_rutina",
-                      F.when(F.col("qty_rutina") > 0, F.col("valor_total")).otherwise(F.lit(0.0)))
-          .withColumn("valor_bonificacion",
-                      F.when(F.col("qty_bonificacion") > 0, F.col("valor_total")).otherwise(F.lit(0.0)))
-          .withColumn("etl_entorno", F.lit(cfg.app.entorno))
-          .withColumn("etl_timestamp", F.current_timestamp())
+    df = df.withColumn(
+        "valor_total",
+        F.col("cantidad_estandar") * F.col("precio_unitario")
     )
-    return df
+
+    return (
+        df
+        .withColumn(
+            "valor_rutina",
+            F.when(F.col("cantidad_rutina") > 0, F.col("valor_total")).otherwise(F.lit(0.0))
+        )
+        .withColumn(
+            "valor_bonificacion",
+            F.when(F.col("cantidad_bonificacion") > 0, F.col("valor_total")).otherwise(F.lit(0.0))
+        )
+        .withColumn("etl_entorno", F.lit(cfg.app.entorno))
+        .withColumn("etl_timestamp", F.current_timestamp())
+    )
+
 
 @seguimiento
 def seleccionar_columnas_finales(df: DataFrame) -> DataFrame:
     """
-    Estándar final de columnas
+    Selecciona el conjunto estándar de columnas finales.
     """
     columnas = [
         "pais",
@@ -212,18 +226,19 @@ def seleccionar_columnas_finales(df: DataFrame) -> DataFrame:
         "ruta",
         "material",
         "tipo_entrega",
-        "precio",
-        "cantidad",
-        "unidad",
-        "cantidad_st",
-        "unidad_final",
-        "qty_rutina",
-        "qty_bonificacion",
-        "qty_total_st",
+        "precio_unitario",
+        "cantidad_origen",
+        "unidad_origen",
+        "cantidad_estandar",
+        "unidad_estandar",
+        "cantidad_rutina",
+        "cantidad_bonificacion",
+        "cantidad_total_estandar",
         "valor_total",
         "valor_rutina",
         "valor_bonificacion",
         "etl_timestamp",
     ]
-    existentes = [c for c in columnas if c in df.columns]
-    return df.select(*existentes)
+
+    columnas_existentes = [c for c in columnas if c in df.columns]
+    return df.select(*columnas_existentes)
