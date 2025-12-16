@@ -1,55 +1,47 @@
 #!/bin/bash
 set -e
 
-# ============================
-# Configuración general
-# ============================
 ENTORNO=${1:-develop}
-
-CONFIG_FILE="configuracion/base.yaml"
-
-# Parámetros opcionales
 FECHA_INICIO=$2
 FECHA_FIN=$3
 PAIS=$4
 
-echo "======================================"
-echo " Ejecutando ETL Entregas"
-echo " Entorno        : $ENTORNO"
-echo " Fecha inicio   : ${FECHA_INICIO:-config}"
-echo " Fecha fin      : ${FECHA_FIN:-config}"
-echo " País           : ${PAIS:-todos}"
-echo "======================================"
+CONFIG_FILE="configuracion/base.yaml"
+LOG_DIR="logs"
+TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+LOG_FILE="${LOG_DIR}/etl_${ENTORNO}_${TIMESTAMP}.log"
 
-# ============================
-# Variables de entorno
-# ============================
+mkdir -p $LOG_DIR
+
+echo "======================================" | tee -a $LOG_FILE
+echo " Ejecutando ETL Entregas"              | tee -a $LOG_FILE
+echo " Entorno      : $ENTORNO"              | tee -a $LOG_FILE
+echo " Fecha inicio : ${FECHA_INICIO:-cfg}" | tee -a $LOG_FILE
+echo " Fecha fin    : ${FECHA_FIN:-cfg}"    | tee -a $LOG_FILE
+echo " País         : ${PAIS:-todos}"       | tee -a $LOG_FILE
+echo "======================================" | tee -a $LOG_FILE
+
 export PYTHONPATH=$(pwd)
 
-# ============================
-# Construcción del comando
-# ============================
 CMD="spark-submit src/principal.py --config $CONFIG_FILE"
 
-if [ ! -z "$FECHA_INICIO" ]; then
+if [ -n "$FECHA_INICIO" ]; then
   CMD="$CMD --fecha_inicio $FECHA_INICIO"
 fi
 
-if [ ! -z "$FECHA_FIN" ]; then
+if [ -n "$FECHA_FIN" ]; then
   CMD="$CMD --fecha_fin $FECHA_FIN"
 fi
 
-if [ ! -z "$PAIS" ]; then
+if [ -n "$PAIS" ]; then
   CMD="$CMD --pais $PAIS"
 fi
 
-# ============================
-# Ejecución
-# ============================
-echo "Ejecutando comando:"
-echo "$CMD"
-echo "--------------------------------------"
+echo "Ejecutando comando:" | tee -a $LOG_FILE
+echo "$CMD"               | tee -a $LOG_FILE
+echo "--------------------------------------" | tee -a $LOG_FILE
 
-eval $CMD
+# 🔑 AQUÍ SE CAPTURA TODO EL LOG
+eval $CMD >> $LOG_FILE 2>&1
 
-echo "ETL finalizado correctamente"
+echo "ETL finalizado correctamente " | tee -a $LOG_FILE
