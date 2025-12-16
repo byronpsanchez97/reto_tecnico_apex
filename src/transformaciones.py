@@ -131,34 +131,53 @@ def filtrar_por_fechas_y_pais(df, cfg):
 # Reglas de negocio
 # =========================
 @seguimiento
+@seguimiento
 def normalizar_unidades_a_st(df: DataFrame, cfg) -> DataFrame:
     """
-    Convierte todo a ST (unidades). CS equivale a 20 ST.
-    Genera:
-      - cantidad_st
-      - unidad_final = 'ST'
+    Normaliza columnas base y convierte unidades a estándar (ST).
+
+    Contrato resultante:
+    - precio_unitario
+    - cantidad_origen
+    - unidad_origen
+    - cantidad_estandar
+    - unidad_estandar
     """
     factor = int(cfg.reglas_negocio.conversion_cs_a_st)
 
+    df = (
+        df
+        # Normalización semántica (UNA SOLA VEZ)
+        .withColumnRenamed("precio", "precio_unitario")
+        .withColumnRenamed("cantidad", "cantidad_origen")
+        .withColumnRenamed("unidad", "unidad_origen")
+    )
+
     return (
-        df.withColumn(
+        df
+        .withColumn(
             "cantidad_estandar",
-            F.when(F.col("unidad") == F.lit("CS"), F.col("cantidad") * F.lit(factor))
-             .when(F.col("unidad") == F.lit("ST"), F.col("cantidad"))
-             .otherwise(F.lit(None))
+            F.when(
+                F.col("unidad_origen") == F.lit("CS"),
+                F.col("cantidad_origen") * F.lit(factor)
+            )
+            .when(
+                F.col("unidad_origen") == F.lit("ST"),
+                F.col("cantidad_origen")
+            )
+            .otherwise(F.lit(None))
         )
         .withColumn("unidad_estandar", F.lit("ST"))
     )
+
 
 @seguimiento
 def clasificar_entregas(df: DataFrame, cfg) -> DataFrame:
     """
     Crea columnas:
-      - cantidad_rutina: entregas tipo ZPRE / ZVE1
-      - cantidad_bonificacion: entregas tipo Z04 / Z05
-      - cantidad_total_estandar: suma de rutina y bonificación
-
-    Descarta otro tipo_entrega no válido.
+    - cantidad_rutina
+    - cantidad_bonificacion
+    - cantidad_total_estandar
     """
     entregas_rutina = list(cfg.reglas_negocio.entregas_rutina)
     entregas_bonificacion = list(cfg.reglas_negocio.entregas_bonificacion)
@@ -189,10 +208,11 @@ def clasificar_entregas(df: DataFrame, cfg) -> DataFrame:
     )
 
 
+
 @seguimiento
 def agregar_columnas_adicionales(df: DataFrame, cfg) -> DataFrame:
     """
-    Agrega métricas monetarias y columnas de auditoría.
+    Agrega métricas monetarias y auditoría ETL.
     """
     df = df.withColumn(
         "valor_total",
@@ -214,6 +234,7 @@ def agregar_columnas_adicionales(df: DataFrame, cfg) -> DataFrame:
     )
 
 
+
 @seguimiento
 def seleccionar_columnas_finales(df: DataFrame) -> DataFrame:
     """
@@ -227,8 +248,8 @@ def seleccionar_columnas_finales(df: DataFrame) -> DataFrame:
         "material",
         "tipo_entrega",
         "precio_unitario",
-        "cantidad",
-        "unidad",
+        "cantidad_origen",
+        "unidad_origen",
         "cantidad_estandar",
         "unidad_estandar",
         "cantidad_rutina",
@@ -240,5 +261,4 @@ def seleccionar_columnas_finales(df: DataFrame) -> DataFrame:
         "etl_timestamp",
     ]
 
-    columnas_existentes = [c for c in columnas if c in df.columns]
-    return df.select(*columnas_existentes)
+    return df.select(*[c for c in columnas if c in df.columns])
