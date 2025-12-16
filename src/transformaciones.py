@@ -85,16 +85,20 @@ def aplicar_calidad_datos(df: DataFrame, cfg) -> DataFrame:
 # =========================
 @seguimiento
 def filtrar_por_fechas_y_pais(df, cfg):
+    fecha_inicio = int(cfg.filtros.fecha_inicio.replace("-", ""))
+    fecha_fin = int(cfg.filtros.fecha_fin.replace("-", ""))
+
     df_filtrado = df.filter(
-        (F.col("fecha_proceso") >= cfg.filtros.fecha_inicio) &
-        (F.col("fecha_proceso") <= cfg.filtros.fecha_fin)
+        (F.col("fecha_proceso") >= fecha_inicio) &
+        (F.col("fecha_proceso") <= fecha_fin)
     )
 
-    # 🔑 Solo filtra por país si viene definido
+    # 🔑 Filtro por país opcional
     if "pais" in cfg.filtros and cfg.filtros.pais:
         df_filtrado = df_filtrado.filter(F.col("pais") == cfg.filtros.pais)
 
     return df_filtrado
+
 
 
 # =========================
