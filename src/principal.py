@@ -113,7 +113,7 @@ def main():
     df = aplicar_calidad_datos(df, cfg)
 
     log("Filtrando por rango de fechas y país...")
-    df = filtrar_por_fecha_y_pais(df, cfg)
+    df = filtrar_por_fechas_y_pais(df, cfg)
 
     log("Normalizando unidades (CS->ST)...")
     df = normalizar_unidades_a_st(df, cfg)
