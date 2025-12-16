@@ -142,12 +142,12 @@ def normalizar_unidades_a_st(df: DataFrame, cfg) -> DataFrame:
 
     return (
         df.withColumn(
-            "cantidad_st",
+            "cantidad_estandar",
             F.when(F.col("unidad") == F.lit("CS"), F.col("cantidad") * F.lit(factor))
              .when(F.col("unidad") == F.lit("ST"), F.col("cantidad"))
              .otherwise(F.lit(None))
         )
-        .withColumn("unidad_final", F.lit("ST"))
+        .withColumn("unidad_estandar", F.lit("ST"))
     )
 
 @seguimiento
@@ -227,8 +227,8 @@ def seleccionar_columnas_finales(df: DataFrame) -> DataFrame:
         "material",
         "tipo_entrega",
         "precio_unitario",
-        "cantidad_origen",
-        "unidad_origen",
+        "cantidad",
+        "unidad",
         "cantidad_estandar",
         "unidad_estandar",
         "cantidad_rutina",
