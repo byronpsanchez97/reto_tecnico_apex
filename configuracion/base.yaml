@@ -6,7 +6,7 @@ input:
   ruta_raw: "data/raw/global_mobility_data_entrega_productos.csv"
 
 output:
-  ruta_silver: "data/silver"
+  ruta_cleaned: "data/cleaned"
   ruta_processed: "data/processed"
   formato: "parquet"
   modo_escritura: "overwrite"
