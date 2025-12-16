@@ -145,7 +145,7 @@ def main():
     df_gold = fun_trf_agregar_columnas_adicionales(df_gold, cfg)
     df_gold = fun_trf_seleccionar_columnas_finales(df_gold)
 
-    df_gold.show(20, truncate=False)
+    
 
     fun_log("Escribiendo proccesed particionado por fecha_proceso...")
     escribir_processed_por_fecha(df_gold, cfg)
