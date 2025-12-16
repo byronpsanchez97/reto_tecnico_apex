@@ -12,8 +12,8 @@ from src.funciones import (
 
 from src.transformaciones import (
     fun_trf_estandarizar_columnas,
-    fun_trf_filtrar_por_fechas_y_pais,
-    fun_trf_normalizar_unidades_a_st,
+    fun_trf_filtrar_fecha_pais,
+    fun_trf_normalizar_unidades_st,
     fun_trf_clasificar_entregas,
     fun_trf_agregar_columnas_adicionales,
     fun_trf_seleccionar_columnas_finales,
@@ -52,6 +52,8 @@ def escribir_processed_por_fecha(df, cfg):
 
     for f in fechas:
         ruta = fun_construir_ruta(cfg.output.ruta_processed, str(f))
+        fun_log(f"Escribiendo GOLD para fecha_proceso={f}")
+
         (
             df.filter(F.col("fecha_proceso") == F.lit(f))
               .write

@@ -51,7 +51,7 @@ def fun_trf_convertir_fecha_proceso(df):
 # Filtros
 # =========================
 @seguimiento
-def fun_trf_filtrar_por_fechas_y_pais(df, cfg):
+def fun_trf_filtrar_fecha_pais(df, cfg):
     fecha_inicio = int(cfg.filtros.fecha_inicio.replace("-", ""))
     fecha_fin = int(cfg.filtros.fecha_fin.replace("-", ""))
 
@@ -71,7 +71,7 @@ def fun_trf_filtrar_por_fechas_y_pais(df, cfg):
 # Reglas de negocio
 # =========================
 @seguimiento
-def fun_trf_normalizar_unidades_a_st(df, cfg):
+def fun_trf_normalizar_unidades_st(df, cfg):
     """
     Normaliza columnas base y convierte unidades a estándar (ST).
     """

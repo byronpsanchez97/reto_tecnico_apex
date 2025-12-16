@@ -82,7 +82,7 @@ def fun_validar_fecha_iso(fecha, campo):
 def fun_log(mensaje):
     print(f"[ETL] {mensaje}")
 
-@seguimiento
+
 def fun_construir_ruta(*partes):
     """
     Construye rutas de forma portable.
