@@ -37,7 +37,7 @@ def escribir_silver(df, cfg):
         df.write
         .mode(cfg.output.modo_escritura)
         .format(cfg.output.formato)
-        .save(cfg.output.ruta_silver)
+        .save(cfg.output.ruta_cleaned)
     )
 
 
@@ -52,7 +52,7 @@ def escribir_processed_por_fecha(df, cfg):
 
     for f in fechas:
         ruta = fun_construir_ruta(cfg.output.ruta_processed, str(f))
-        fun_log(f"Escribiendo GOLD para fecha_proceso={f}")
+        fun_log(f"Escribiendo processed para fecha_proceso={f}")
 
         (
             df.filter(F.col("fecha_proceso") == F.lit(f))
