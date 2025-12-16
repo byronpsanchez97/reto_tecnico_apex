@@ -129,10 +129,10 @@ def main():
     df = fun_aplicar_calidad(df, cfg)
 
     fun_log("Filtrando por fechas y país...")
-    df = fun_trf_filtrar_por_fechas_y_pais(df, cfg)
+    df = fun_trf_filtrar_fecha_pais(df, cfg)
 
     fun_log("Normalizando unidades (CS → ST)...")
-    df = fun_trf_normalizar_unidades_a_st(df, cfg)
+    df = fun_trf_normalizar_unidades_st(df, cfg)
 
     fun_log("Persistiendo capa Silver...")
     escribir_silver(df, cfg)
