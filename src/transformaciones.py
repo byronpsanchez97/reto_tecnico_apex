@@ -136,19 +136,12 @@ def normalizar_unidades_a_st(df: DataFrame, cfg) -> DataFrame:
     """
     Normaliza columnas base y convierte unidades a estándar (ST).
 
-    Contrato resultante:
-    - precio_unitario
-    - cantidad_origen
-    - unidad_origen
-    - cantidad_estandar
-    - unidad_estandar
     """
     factor = int(cfg.reglas_negocio.conversion_cs_a_st)
 
     df = (
         df
         # Normalización semántica (UNA SOLA VEZ)
-        .withColumnRenamed("precio", "precio_unitario")
         .withColumnRenamed("cantidad", "cantidad_origen")
         .withColumnRenamed("unidad", "unidad_origen")
     )
@@ -214,20 +207,17 @@ def agregar_columnas_adicionales(df: DataFrame, cfg) -> DataFrame:
     """
     Agrega métricas monetarias y auditoría ETL.
     """
-    df = df.withColumn(
-        "valor_total",
-        F.col("cantidad_estandar") * F.col("precio_unitario")
-    )
+
 
     return (
         df
         .withColumn(
             "valor_rutina",
-            F.when(F.col("cantidad_rutina") > 0, F.col("valor_total")).otherwise(F.lit(0.0))
+            F.when(F.col("cantidad_rutina") > 0, F.col("precio")).otherwise(F.lit(0.0))
         )
         .withColumn(
             "valor_bonificacion",
-            F.when(F.col("cantidad_bonificacion") > 0, F.col("valor_total")).otherwise(F.lit(0.0))
+            F.when(F.col("cantidad_bonificacion") > 0, F.col("precio")).otherwise(F.lit(0.0))
         )
         .withColumn("etl_entorno", F.lit(cfg.app.entorno))
         .withColumn("etl_timestamp", F.current_timestamp())
@@ -247,7 +237,7 @@ def seleccionar_columnas_finales(df: DataFrame) -> DataFrame:
         "ruta",
         "material",
         "tipo_entrega",
-        "precio_unitario",
+        "precio",
         "cantidad_origen",
         "unidad_origen",
         "cantidad_estandar",
@@ -255,7 +245,6 @@ def seleccionar_columnas_finales(df: DataFrame) -> DataFrame:
         "cantidad_rutina",
         "cantidad_bonificacion",
         "cantidad_total_estandar",
-        "valor_total",
         "valor_rutina",
         "valor_bonificacion",
         "etl_timestamp",
