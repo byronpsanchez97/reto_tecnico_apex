@@ -93,7 +93,7 @@ def fun_construir_ruta(*partes):
         if p is not None and str(p).strip() != ""
     )
 
-@seguimiento
+
 def fun_normalizar_columna(col):
     """
     Normaliza texto categórico (trim + upper).
