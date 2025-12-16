@@ -124,6 +124,7 @@ def main():
     df_gold = clasificar_entregas(df, cfg)
     df_gold = agregar_columnas_adicionales(df_gold, cfg)
     df_gold = seleccionar_columnas_finales(df_gold)
+    df_gold.show(5)
 
     log("Escribiendo GOLD por fecha_proceso...")
     _escribir_processed_por_fecha(df_gold, cfg)
