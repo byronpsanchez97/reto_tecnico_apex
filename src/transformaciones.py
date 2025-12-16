@@ -2,22 +2,48 @@ from __future__ import annotations
 
 from pyspark.sql import DataFrame
 from pyspark.sql import functions as F
+import re
+import unicodedata
+from pyspark.sql import DataFrame
 
 from src.funciones import normalizar_texto, seguimiento
 
 
 # =========================
-# Estandarización / parsing
+# Estandarizacion
 # =========================
+
+
 
 @seguimiento
 def estandarizar_columnas(df: DataFrame) -> DataFrame:
     """
-    Aplica estándar simple: minúsculas. (El CSV ya viene en snake_case)
+    Estandariza los nombres de las columnas a formato snake_case.
+
     """
-    for c in df.columns:
-        df = df.withColumnRenamed(c, c.lower())
-    return df
+    nuevas_columnas = []
+
+    for columna in df.columns:
+        # eliminar acentos
+        nombre = unicodedata.normalize("NFKD", columna)
+        nombre = nombre.encode("ascii", "ignore").decode("ascii")
+
+        # convertir a minúsculas
+        nombre = nombre.lower().strip()
+
+        # reemplazar caracteres no alfanuméricos por '_'
+        nombre = re.sub(r"[^a-z0-9]+", "_", nombre)
+
+        # colapsar multiples '_'
+        nombre = re.sub(r"_+", "_", nombre)
+
+        # eliminar '_' iniciales y finales
+        nombre = nombre.strip("_")
+
+        nuevas_columnas.append(nombre)
+
+    return df.toDF(*nuevas_columnas)
+
 
 @seguimiento
 def convertir_fecha_proceso(df: DataFrame) -> DataFrame:
@@ -36,13 +62,13 @@ def convertir_fecha_proceso(df: DataFrame) -> DataFrame:
 @seguimiento
 def aplicar_calidad_datos(df: DataFrame, cfg) -> DataFrame:
     """
-    Elimina anomalías y normaliza campos clave:
-    - Nulls críticos
+    Elimina anomalias y normaliza campos clave:
+    - Nulls criticos
     - Cantidad negativa
     - Unidad y tipo_entrega fuera de dominio
-    - Duplicados lógicos
+    - Duplicados logicos
     """
-    # Normalización de strings (evita " gt ", "cs", etc.)
+    # Normalizacion de campos strings 
     df = (
         df.withColumn("pais", normalizar_texto(F.col("pais")))
           .withColumn("unidad", normalizar_texto(F.col("unidad")))
@@ -50,7 +76,7 @@ def aplicar_calidad_datos(df: DataFrame, cfg) -> DataFrame:
           .withColumn("material", F.trim(F.col("material")))
     )
 
-    # Nulls críticos
+    # Nulls criticos
     df = (
         df.filter(F.col("fecha_proceso").isNotNull())
           .filter(F.col("pais").isNotNull())
@@ -59,7 +85,7 @@ def aplicar_calidad_datos(df: DataFrame, cfg) -> DataFrame:
           .filter(F.col("unidad").isNotNull())
     )
 
-    # Tipos numéricos + anomalías
+    # Tipos numericos + anomalias
     df = (
         df.withColumn("cantidad", F.col("cantidad").cast("double"))
           .withColumn("precio", F.col("precio").cast("double"))
@@ -67,14 +93,14 @@ def aplicar_calidad_datos(df: DataFrame, cfg) -> DataFrame:
           .filter(F.col("precio").isNotNull() & (F.col("precio") >= 0))
     )
 
-    # Dominios válidos
+    # Dominios validos
     unidades_validas = [u for u in cfg.calidad_datos.unidades_validas]
     tipos_validos = [t for t in cfg.calidad_datos.tipos_entrega_validos]
 
     df = df.filter(F.col("unidad").isin(unidades_validas))
     df = df.filter(F.col("tipo_entrega").isin(tipos_validos))
 
-    # Dedupe lógico (ajustado a tu dataset)
+    # Dedupe logico (ajustado a tu dataset)
     df = df.dropDuplicates(["fecha_proceso", "pais", "material", "tipo_entrega", "ruta", "transporte"])
 
     return df
@@ -93,7 +119,7 @@ def filtrar_por_fechas_y_pais(df, cfg):
         (F.col("fecha_proceso") <= fecha_fin)
     )
 
-    # 🔑 Filtro por país opcional
+    # Filtro por pais si se especifica
     if "pais" in cfg.filtros and cfg.filtros.pais:
         df_filtrado = df_filtrado.filter(F.col("pais") == cfg.filtros.pais)
 
