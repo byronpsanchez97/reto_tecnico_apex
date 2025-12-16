@@ -78,7 +78,7 @@ def fun_validar_fecha_iso(fecha, campo):
             f"'{campo}' inválido: {fecha}. Formato esperado: YYYY-MM-DD"
         ) from e
 
-@seguimiento
+
 def fun_log(mensaje):
     print(f"[ETL] {mensaje}")
 

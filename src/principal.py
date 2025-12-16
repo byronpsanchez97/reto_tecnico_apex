@@ -122,8 +122,6 @@ def main():
     fun_log("Estandarizando nombres de columnas...")
     df = fun_trf_estandarizar_columnas(df)
 
-    fun_log("Convirtiendo fecha_proceso...")
-    df = fun_trf_convertir_fecha_proceso(df)
 
     fun_log("Aplicando calidad de datos...")
     df = fun_aplicar_calidad(df, cfg)
