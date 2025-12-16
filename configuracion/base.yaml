@@ -3,9 +3,10 @@ app:
   entorno: "develop"
 
 input:
-  ruta_origen: "data/raw/global_mobility_data_entrega_productos.csv"
+  ruta_raw: "data/raw/global_mobility_data_entrega_productos.csv"
 
 output:
+  ruta_silver: "data/silver"
   ruta_processed: "data/processed"
   formato: "parquet"
   modo_escritura: "overwrite"

@@ -84,17 +84,17 @@ def aplicar_calidad_datos(df: DataFrame, cfg) -> DataFrame:
 # Filtros
 # =========================
 @seguimiento
-def filtrar_por_fecha_y_pais(df: DataFrame, cfg) -> DataFrame:
-    """
-    Filtra por rango (inclusive) y por país.
-    """
-    return (
-        df.filter(
-            (F.col("fecha_proceso") >= F.lit(cfg.filtros.fecha_inicio)) &
-            (F.col("fecha_proceso") <= F.lit(cfg.filtros.fecha_fin))
-        )
-        .filter(F.col("pais") == F.lit(cfg.filtros.pais))
+def filtrar_por_fechas_y_pais(df, cfg):
+    df_filtrado = df.filter(
+        (F.col("fecha_proceso") >= cfg.filtros.fecha_inicio) &
+        (F.col("fecha_proceso") <= cfg.filtros.fecha_fin)
     )
+
+    # 🔑 Solo filtra por país si viene definido
+    if "pais" in cfg.filtros and cfg.filtros.pais:
+        df_filtrado = df_filtrado.filter(F.col("pais") == cfg.filtros.pais)
+
+    return df_filtrado
 
 
 # =========================

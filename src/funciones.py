@@ -49,11 +49,16 @@ def seguimiento(func):
     return wrapper
 
 
-def crear_spark(nombre_app: str) -> SparkSession:
-    """
-    Crea una SparkSession básica.
-    """
-    return SparkSession.builder.appName(nombre_app).getOrCreate()
+def crear_spark(nombre_app: str):
+    spark = (
+        SparkSession.builder
+        .appName(nombre_app)
+        .getOrCreate()
+    )
+
+    spark.sparkContext.setLogLevel("ERROR")
+    return spark
+
 
 
 def validar_fecha_iso(fecha: str, campo: str) -> None:
