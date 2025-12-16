@@ -115,7 +115,7 @@ def main():
     # =====================
     # Bronze
     # =====================
-    fun_log("Leyendo datos de origen (Bronze)...")
+    fun_log("Leyendo datos de origen...")
     df = leer_csv_bronze(spark, cfg)
 
     # =====================
@@ -131,10 +131,10 @@ def main():
     fun_log("Filtrando por fechas y país...")
     df = fun_trf_filtrar_fecha_pais(df, cfg)
 
-    fun_log("Normalizando unidades (CS → ST)...")
+    fun_log("Normalizando unidades (CS a ST)...")
     df = fun_trf_normalizar_unidades_st(df, cfg)
 
-    fun_log("Persistiendo capa Silver...")
+    fun_log("Persistiendo cleaned...")
     escribir_silver(df, cfg)
 
     # =====================
@@ -147,7 +147,7 @@ def main():
 
     df_gold.show(20, truncate=False)
 
-    fun_log("Escribiendo GOLD particionado por fecha_proceso...")
+    fun_log("Escribiendo proccesed particionado por fecha_proceso...")
     escribir_processed_por_fecha(df_gold, cfg)
 
     fun_log("Proceso completado.")
