@@ -12,7 +12,6 @@ from src.funciones import (
 
 from src.transformaciones import (
     fun_trf_estandarizar_columnas,
-    fun_trf_convertir_fecha_proceso,
     fun_trf_filtrar_por_fechas_y_pais,
     fun_trf_normalizar_unidades_a_st,
     fun_trf_clasificar_entregas,

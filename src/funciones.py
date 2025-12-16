@@ -52,6 +52,7 @@ def seguimiento(func):
 # =========================
 # Spark
 # =========================
+@seguimiento
 def fun_crear_sesion_spark(nombre_app):
     spark = (
         SparkSession.builder
@@ -65,6 +66,7 @@ def fun_crear_sesion_spark(nombre_app):
 # =========================
 # Utilidades generales
 # =========================
+@seguimiento
 def fun_validar_fecha_iso(fecha, campo):
     """
     Valida fecha en formato YYYY-MM-DD.
@@ -76,11 +78,11 @@ def fun_validar_fecha_iso(fecha, campo):
             f"'{campo}' inválido: {fecha}. Formato esperado: YYYY-MM-DD"
         ) from e
 
-
+@seguimiento
 def fun_log(mensaje):
     print(f"[ETL] {mensaje}")
 
-
+@seguimiento
 def fun_construir_ruta(*partes):
     """
     Construye rutas de forma portable.
@@ -91,7 +93,7 @@ def fun_construir_ruta(*partes):
         if p is not None and str(p).strip() != ""
     )
 
-
+@seguimiento
 def fun_normalizar_columna(col):
     """
     Normaliza texto categórico (trim + upper).
@@ -102,6 +104,7 @@ def fun_normalizar_columna(col):
 # =========================
 # Calidad de datos
 # =========================
+@seguimiento
 def fun_normalizar_texto(df):
     return (
         df.withColumn("pais", fun_normalizar_columna(F.col("pais")))
@@ -111,7 +114,7 @@ def fun_normalizar_texto(df):
           .withColumn("material", F.trim(F.col("material")))
     )
 
-
+@seguimiento
 def fun_filtrar_nulls(df):
     return df.filter(
         F.col("fecha_proceso").isNotNull() &
@@ -121,7 +124,7 @@ def fun_filtrar_nulls(df):
         F.col("unidad").isNotNull()
     )
 
-
+@seguimiento
 def fun_validar_numericos(df):
     return (
         df.withColumn("cantidad", F.col("cantidad").cast("double"))
