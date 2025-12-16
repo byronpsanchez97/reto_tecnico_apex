@@ -14,7 +14,7 @@ output:
 filtros:
   fecha_inicio: "2025-01-01"
   fecha_fin: "2025-06-30"
-  pais: "GT"
+  pais: null
 
 reglas_negocio:
   conversion_cs_a_st: 20
