@@ -85,7 +85,7 @@ def fun_log(mensaje):
 
 def fun_construir_ruta(*partes):
     """
-    Construye rutas de forma portable.
+    Construye rutas
     """
     return "/".join(
         p.strip("/").replace("\\", "/")
@@ -96,7 +96,7 @@ def fun_construir_ruta(*partes):
 
 def fun_normalizar_columna(col):
     """
-    Normaliza texto categórico (trim + upper).
+    Normaliza texto categórico 
     """
     return F.upper(F.trim(col))
 
