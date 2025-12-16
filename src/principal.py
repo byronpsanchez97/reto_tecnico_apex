@@ -7,7 +7,6 @@ from pyspark.sql import functions as F
 from src.funciones import crear_spark, validar_fecha_iso, log, construir_ruta
 from src.transformaciones import (
     estandarizar_columnas,
-    convertir_fecha_proceso,
     aplicar_calidad_datos,
     filtrar_por_fechas_y_pais,
     normalizar_unidades_a_st,
@@ -56,7 +55,7 @@ def _escribir_processed_por_fecha(df, cfg):
 
 
 def parse_args():
-    p = argparse.ArgumentParser(description="ETL Entregas (OmegaConf + PySpark) - Medallion")
+    p = argparse.ArgumentParser(description="ETL Entregas")
     p.add_argument("--config", required=True, help="Ruta YAML base. Ej: configuracion/base.yaml")
     p.add_argument("--entorno", default=None, help="develop|qa|main (merge configuracion/<entorno>.yaml)")
     p.add_argument("--fecha_inicio", default=None, help="Override YYYY-MM-DD")
@@ -95,9 +94,9 @@ def main():
     spark = crear_spark(cfg.app.nombre)
 
     # =====================
-    # BRONZE
+    # RAW
     # =====================
-    log("Leyendo BRONZE...")
+    log("Leyendo RAW...")
     df = _leer_csv_bronze(spark, cfg)
 
     # =====================
@@ -106,8 +105,6 @@ def main():
     log("Estandarizando columnas...")
     df = estandarizar_columnas(df)
 
-    log("Convirtiendo fecha_proceso (yyyyMMdd -> date)...")
-    df = convertir_fecha_proceso(df)
 
     log("Aplicando calidad de datos...")
     df = aplicar_calidad_datos(df, cfg)
@@ -122,7 +119,7 @@ def main():
     _escribir_silver(df, cfg)
 
     # =====================
-    # GOLD
+    # Processed
     # =====================
     log("Clasificando tipos de entrega (rutina/bonificación) y agregando métricas...")
     df_gold = clasificar_entregas(df, cfg)
