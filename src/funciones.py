@@ -131,13 +131,15 @@ def fun_validar_numericos(df):
           .filter(F.col("precio").isNotNull() & (F.col("precio") >= 0))
     )
 
-
+@seguimiento
 def fun_validar_dominios(df, cfg):
-    return (
-        df.filter(F.col("unidad").isin(cfg.calidad_datos.unidades_validas))
-          .filter(F.col("tipo_entrega").isin(cfg.calidad_datos.tipos_entrega_validos))
-    )
+    unidades_validas = list(cfg.calidad_datos.unidades_validas)
+    tipos_validos = list(cfg.calidad_datos.tipos_entrega_validos)
 
+    return (
+        df.filter(F.col("unidad").isin(unidades_validas))
+          .filter(F.col("tipo_entrega").isin(tipos_validos))
+    )
 
 @seguimiento
 def fun_aplicar_calidad(df, cfg):
