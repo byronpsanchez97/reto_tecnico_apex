@@ -1,0 +1,25 @@
+app:
+  nombre: "etl_entregas"
+  entorno: "develop"
+
+input:
+  ruta_origen: "data/raw/global_mobility_data_entrega_productos.csv"
+
+output:
+  ruta_processed: "data/processed"
+  formato: "parquet"
+  modo_escritura: "overwrite"
+
+filtros:
+  fecha_inicio: "2025-01-01"
+  fecha_fin: "2025-06-30"
+  pais: "GT"
+
+reglas_negocio:
+  conversion_cs_a_st: 20
+  entregas_rutina: ["ZPRE", "ZVE1"]
+  entregas_bonificacion: ["Z04", "Z05"]
+
+calidad_datos:
+  unidades_validas: ["CS", "ST"]
+  tipos_entrega_validos: ["ZPRE", "ZVE1", "Z04", "Z05"]
