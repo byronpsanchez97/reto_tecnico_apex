@@ -1,25 +1,14 @@
-from __future__ import annotations
-
-from pyspark.sql import DataFrame
 from pyspark.sql import functions as F
-import re
-import unicodedata
-from pyspark.sql import DataFrame
-
 from src.funciones import normalizar_texto, seguimiento
 
 
 # =========================
-# Estandarizacion
+# Estandarización
 # =========================
-
-
-
 @seguimiento
-def estandarizar_columnas(df: DataFrame) -> DataFrame:
+def fun_trf_estandarizar_columnas(df):
     """
     Estandariza los nombres de las columnas a formato snake_case.
-
     """
     nuevas_columnas = []
 
@@ -46,7 +35,7 @@ def estandarizar_columnas(df: DataFrame) -> DataFrame:
 
 
 @seguimiento
-def convertir_fecha_proceso(df: DataFrame) -> DataFrame:
+def fun_trf_convertir_fecha_proceso(df):
     """
     Convierte fecha_proceso de YYYYMMDD a date (YYYY-MM-DD).
     """
@@ -57,60 +46,10 @@ def convertir_fecha_proceso(df: DataFrame) -> DataFrame:
 
 
 # =========================
-# Calidad de datos
-# =========================
-@seguimiento
-def aplicar_calidad_datos(df: DataFrame, cfg) -> DataFrame:
-    """
-    Elimina anomalias y normaliza campos clave:
-    - Nulls criticos
-    - Cantidad negativa
-    - Unidad y tipo_entrega fuera de dominio
-    - Duplicados logicos
-    """
-    # Normalizacion de campos strings 
-    df = (
-        df.withColumn("pais", normalizar_texto(F.col("pais")))
-          .withColumn("unidad", normalizar_texto(F.col("unidad")))
-          .withColumn("tipo_entrega", normalizar_texto(F.col("tipo_entrega")))
-          .withColumn("material", F.trim(F.col("material")))
-    )
-
-    # Nulls criticos
-    df = (
-        df.filter(F.col("fecha_proceso").isNotNull())
-          .filter(F.col("pais").isNotNull())
-          .filter(F.col("material").isNotNull())
-          .filter(F.col("tipo_entrega").isNotNull())
-          .filter(F.col("unidad").isNotNull())
-    )
-
-    # Tipos numericos + anomalias
-    df = (
-        df.withColumn("cantidad", F.col("cantidad").cast("double"))
-          .withColumn("precio", F.col("precio").cast("double"))
-          .filter(F.col("cantidad").isNotNull() & (F.col("cantidad") >= 0))
-          .filter(F.col("precio").isNotNull() & (F.col("precio") >= 0))
-    )
-
-    # Dominios validos
-    unidades_validas = [u for u in cfg.calidad_datos.unidades_validas]
-    tipos_validos = [t for t in cfg.calidad_datos.tipos_entrega_validos]
-
-    df = df.filter(F.col("unidad").isin(unidades_validas))
-    df = df.filter(F.col("tipo_entrega").isin(tipos_validos))
-
-    # Dedupe logico (ajustado a tu dataset)
-    df = df.dropDuplicates(["fecha_proceso", "pais", "material", "tipo_entrega", "ruta", "transporte"])
-
-    return df
-
-
-# =========================
 # Filtros
 # =========================
 @seguimiento
-def filtrar_por_fechas_y_pais(df, cfg):
+def fun_trf_filtrar_por_fechas_y_pais(df, cfg):
     fecha_inicio = int(cfg.filtros.fecha_inicio.replace("-", ""))
     fecha_fin = int(cfg.filtros.fecha_fin.replace("-", ""))
 
@@ -126,16 +65,13 @@ def filtrar_por_fechas_y_pais(df, cfg):
     return df_filtrado
 
 
-
 # =========================
 # Reglas de negocio
 # =========================
 @seguimiento
-@seguimiento
-def normalizar_unidades_a_st(df: DataFrame, cfg) -> DataFrame:
+def fun_trf_normalizar_unidades_a_st(df, cfg):
     """
     Normaliza columnas base y convierte unidades a estándar (ST).
-
     """
     factor = int(cfg.reglas_negocio.conversion_cs_a_st)
 
@@ -165,7 +101,7 @@ def normalizar_unidades_a_st(df: DataFrame, cfg) -> DataFrame:
 
 
 @seguimiento
-def clasificar_entregas(df: DataFrame, cfg) -> DataFrame:
+def fun_trf_clasificar_entregas(df, cfg):
     """
     Crea columnas:
     - cantidad_rutina
@@ -201,14 +137,11 @@ def clasificar_entregas(df: DataFrame, cfg) -> DataFrame:
     )
 
 
-
 @seguimiento
-def agregar_columnas_adicionales(df: DataFrame, cfg) -> DataFrame:
+def fun_trf_agregar_columnas_adicionales(df, cfg):
     """
     Agrega métricas monetarias y auditoría ETL.
     """
-
-
     return (
         df
         .withColumn(
@@ -224,9 +157,8 @@ def agregar_columnas_adicionales(df: DataFrame, cfg) -> DataFrame:
     )
 
 
-
 @seguimiento
-def seleccionar_columnas_finales(df: DataFrame) -> DataFrame:
+def fun_trf_seleccionar_columnas_finales(df):
     """
     Selecciona el conjunto estándar de columnas finales.
     """
