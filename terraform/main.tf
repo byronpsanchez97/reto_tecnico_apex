@@ -81,6 +81,8 @@ user_data = <<-EOF
             EOT
             chmod +x /etc/profile.d/spark.sh
 
+            echo "===> Instalando herramientas base"
+            sudo yum install -y git
             
             echo "===> Bootstrap completado correctamente"
             EOF
