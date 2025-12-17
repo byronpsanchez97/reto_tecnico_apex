@@ -79,7 +79,7 @@ def fun_trf_normalizar_unidades_st(df, cfg):
 
     df = (
         df
-        # Normalización semántica (UNA SOLA VEZ)
+        # Etiquetar columnas originales
         .withColumnRenamed("cantidad", "cantidad_origen")
         .withColumnRenamed("unidad", "unidad_origen")
     )

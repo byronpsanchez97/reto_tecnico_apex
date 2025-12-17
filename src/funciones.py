@@ -147,8 +147,8 @@ def fun_validar_dominios(df, cfg):
 @seguimiento
 def fun_aplicar_calidad(df, cfg):
     """
-    Aplica reglas técnicas de calidad de datos.
-    No contiene reglas de negocio.
+    Reglas de calidad de datos.
+
     """
     df = fun_normalizar_texto(df)
     df = fun_filtrar_nulls(df)
