@@ -74,11 +74,14 @@ user_data = <<-EOF
               ln -s $${SPARK_PACKAGE} spark
             fi
 
-            echo "===> Configurando SPARK_HOME"
-            echo "export SPARK_HOME=/opt/spark" > /etc/profile.d/spark.sh
-            echo "export PATH=\\$SPARK_HOME/bin:\\$PATH" >> /etc/profile.d/spark.sh
+            echo "===> Configurando SPARK_HOME y PATH"
+            cat <<'EOT' > /etc/profile.d/spark.sh
+            export SPARK_HOME=/opt/spark
+            export PATH=$SPARK_HOME/bin:$PATH
+            EOT
             chmod +x /etc/profile.d/spark.sh
 
+            
             echo "===> Bootstrap completado correctamente"
             EOF
 
