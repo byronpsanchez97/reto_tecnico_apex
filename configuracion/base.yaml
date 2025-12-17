@@ -24,3 +24,4 @@ reglas_negocio:
 calidad_datos:
   unidades_validas: ["CS", "ST"]
   tipos_entrega_validos: ["ZPRE", "ZVE1", "Z04", "Z05"]
+
