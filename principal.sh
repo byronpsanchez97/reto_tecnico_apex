@@ -41,7 +41,6 @@ echo "Ejecutando comando:" | tee -a $LOG_FILE
 echo "$CMD"               | tee -a $LOG_FILE
 echo "--------------------------------------" | tee -a $LOG_FILE
 
-# 🔑 AQUÍ SE CAPTURA TODO EL LOG
 eval $CMD >> $LOG_FILE 2>&1
 
 echo "ETL finalizado correctamente " | tee -a $LOG_FILE
