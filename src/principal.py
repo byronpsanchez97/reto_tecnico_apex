@@ -23,7 +23,7 @@ from src.transformaciones import (
 # =====================
 # I/O
 # =====================
-def leer_csv_bronze(spark, cfg):
+def fun_leer_csv(spark, cfg):
     return (
         spark.read
         .option("header", True)
@@ -32,7 +32,7 @@ def leer_csv_bronze(spark, cfg):
     )
 
 
-def escribir_silver(df, cfg):
+def fun_escribir_curated(df, cfg):
     (
         df.write
         .mode(cfg.output.modo_escritura)
@@ -41,7 +41,7 @@ def escribir_silver(df, cfg):
     )
 
 
-def escribir_processed_por_fecha(df, cfg):
+def fun_escribir_processed(df, cfg):
     """
     Requerimiento: data/processed/${fecha_proceso}
     """
@@ -113,13 +113,13 @@ def main():
     spark = fun_crear_sesion_spark(cfg.app.nombre)
 
     # =====================
-    # Bronze
+    # Raw
     # =====================
     fun_log("Leyendo datos de origen...")
-    df = leer_csv_bronze(spark, cfg)
+    df = fun_leer_csv(spark, cfg)
 
     # =====================
-    # Silver
+    # Curated
     # =====================
     fun_log("Estandarizando nombres de columnas...")
     df = fun_trf_estandarizar_columnas(df)
@@ -135,10 +135,10 @@ def main():
     df = fun_trf_normalizar_unidades_st(df, cfg)
 
     fun_log("Persistiendo cleaned...")
-    escribir_silver(df, cfg)
+    fun_escribir_curated(df, cfg)
 
     # =====================
-    # Gold / Processed
+    # Processed
     # =====================
     fun_log("Aplicando reglas de negocio y métricas...")
     df_gold = fun_trf_clasificar_entregas(df, cfg)
@@ -148,7 +148,7 @@ def main():
     
 
     fun_log("Escribiendo proccesed particionado por fecha_proceso...")
-    escribir_processed_por_fecha(df_gold, cfg)
+    fun_escribir_processed(df_gold, cfg)
 
     fun_log("Proceso completado.")
     spark.stop()
