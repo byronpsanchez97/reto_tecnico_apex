@@ -39,7 +39,6 @@ git clone https://github.com/byronpsanchez97/reto_tecnico_apex.git
 cd reto_tecnico_apex
 ```
 
-
 ## Actualización de pip e Instalación de Dependencias
 
 Antes de ejecutar el ETL, en ciertos casos es necesario actualizar pip3 y luego instalar las dependencias del proyecto para ello procedemos de la siguiente manera:
@@ -55,6 +54,44 @@ Se otorgan permisos de ejecución al script principal:
 chmod +x principal.sh
 ```
 Este script ejecuta internamente spark-submit y lanza el flujo completo de procesamiento.
+
+El proceso ETL soporta dos modalidades de ejecución, permitiendo flexibilidad sin duplicar configuraciones.
+
+### Opción 1: Ejecución usando valores por defecto
+Cuando el script principal.sh se ejecuta sin parámetros adicionales, el ETL utiliza automáticamente los valores definidos en configuracion/base.yaml.
+
+El archivo configuracion/base.yaml define los parámetros por defecto del proceso:
+
+```yaml
+filtros:
+  fecha_inicio: "2025-01-01"
+  fecha_fin: "2025-06-30"
+  pais: null
+
+```
+``` bash
+./principal.sh
+```
+En este caso:
+Se cargan los parámetros desde base.yaml
+No se sobrescribe ningún valor
+Se ejecuta el proceso completo según la configuración base
+
+### Opción 2: Ejecución parametrizada
+
+Si principal.sh se ejecuta pasando parámetros, estos sobrescriben los valores de base.yaml únicamente para esa ejecución.
+```
+./principal.sh develop 2025-02-01 2025-02-28 EC
+```
+En este caso:
+Se cargan los valores de base.yaml
+
+Luego se aplican los parámetros recibidos por el script:
+fecha_inicio = 2025-02-01
+fecha_fin = 2025-02-28
+pais = EC
+
+
 
 ## Logs
 Al finalizar la ejecución, los logs del proceso pueden revisarse en:
@@ -86,3 +123,35 @@ y los transforma progresivamente siguiendo una arquitectura por capas.
    - Clasificación por tipo de entrega
    - Cálculo de métricas (rutina / bonificación)
    - Particionado por `fecha_proceso`
+
+
+
+### Diagrama del Flujo ETL
+
+```text
+┌────────────┐
+│   CSV Raw  │
+│            │
+└─────┬──────┘
+      │
+      ▼
+┌────────────────────────┐
+│ Estandarización        │
+│ + Calidad de Datos     │
+│ + Normalización Unid.  │
+│        (curated)       │
+└─────┬──────────────────┘
+      │
+      ▼
+┌────────────────────────┐
+│ Reglas de Negocio      │
+│ Clasificación Entregas │
+│ Métricas               │
+│      (Processed)       │
+└─────┬──────────────────┘
+      │
+      ▼
+┌────────────────────────┐
+│ data/processed/        │
+│ fecha_proceso=YYYYMMDD│
+└────────────────────────┘
